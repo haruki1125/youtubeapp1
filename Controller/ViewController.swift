@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         
+           
         button.layer.cornerRadius = 10
         
     }
@@ -36,20 +37,17 @@ class ViewController: UIViewController {
                 print(user.debugDescription)
                 
                 //アプリ内にテキストフィールドのテキストをほぞん
-                UserDefaults.standard.set(self.textfield.text,forKey: "userName")
+                UserDefaults.standard.setValue(self.textfield.text, forKey: "userName")
+                //画面遷移
                 
                 
-                let profileVC = self.storyboard?.instantiateViewController(identifier: "profileVC") as!
+                let profileVC = self.storyboard!.instantiateViewController(identifier: "profileVC") as!
                 ProfileViewController
                 profileVC.userName = self.textfield.text!
                 
                 self.navigationController?.pushViewController(profileVC, animated: true)
                 
                 
-                
-                
-                //画面遷移
-             //   let profile = self
                 
             }
             
