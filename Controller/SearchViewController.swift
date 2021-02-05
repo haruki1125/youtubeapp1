@@ -60,6 +60,8 @@ class SearchViewController: UIViewController,UITableViewDelegate,UITableViewData
         return dataSetsArray.count
     }
     
+    
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "VideoCell",for: indexPath) as! VideoCell
@@ -119,12 +121,15 @@ class SearchViewController: UIViewController,UITableViewDelegate,UITableViewData
     
     @IBAction func search(_ sender: Any) {
         
-        let urlString = "https://www.googleapis.com/youtube/v3/search?key=AIzaSyCqhAf5Y_GcO4hOHnceDQkCTv2KSwo0OAU&part=snippet&q=\(searchTextField.text!)&maxResults=50"
+        let urlString = "https://www.googleapis.com/youtube/v3/search?key=AIzaSyAu21Dq7wQvdTcr8oUlaXnmJvRotEGX7E4&part=snippet&q=\(searchTextField.text!)&maxResults=50"
         let searchModel = SeachAndLoadModel(urlString: urlString)
         searchModel.doneCatchDataProtocol = self
         searchModel.search()
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 100
+    }
     
     func doneCatchData(array: [DataSets]) {
         print(array.debugDescription)

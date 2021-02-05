@@ -9,7 +9,7 @@ import UIKit
 import SDWebImage
 import youtube_ios_player_helper
 
-class ListViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,DoneLoadDataProtocol,DoneLoadUserNameProtocol {
+class ListViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,DoneLoadDataProtocol,DoneLoadUserNameProtocol,YTPlayerViewDelegate {
     
     
     
@@ -21,6 +21,7 @@ class ListViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
     var dataSetsArray = [DataSets]()
     var userNameArray = [String]()
     var searchAndLoad = SeachAndLoadModel()
+    var youtubeView = YTPlayerView()
     
     
     
@@ -122,6 +123,38 @@ class ListViewController: UIViewController,UITableViewDelegate,UITableViewDataSo
         
         tableView.reloadData()
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tag == 1{
+            
+            youtubeView.removeFromSuperview()
+            
+            let statusBarHeight = UIApplication.shared.statusBarFrame.height
+            
+            let navBarHeight = self.navigationController?.navigationBar.frame.size.height
+            
+            youtubeView = YTPlayerView(frame: CGRect(x: 0, y: statusBarHeight + navBarHeight!, width: view.frame.size.width, height: 240))
+            
+            youtubeView.delegate = self
+            youtubeView.load(withVideoId: String(dataSetsArray[indexPath.row].videoID!),playerVars: ["playersinline":1])
+            view.addSubview(youtubeView)
+            
+        
+            
+        }else{
+            
+            let storyBoard = UIStoryboard(name: "Main", bundle: nil)
+            let detailVC = storyboard?.instantiateViewController(withIdentifier: "detailVC") as! DetailViewController
+            detailVC.userName = userNameArray[indexPath.row]
+            self.navigationController?.pushViewController(detailVC, animated: true)
+            
+        }
+    }
+    
+    func playerViewDidBecomeReady(_ playerView: YTPlayerView) {
+        playerView.playVideo()
+    }
+    
     /*
     // MARK: - Navigation
 

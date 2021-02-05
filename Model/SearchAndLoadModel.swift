@@ -28,16 +28,32 @@ protocol DoneLoadUserNameProtocol {
     
 }
 
+protocol DoneLoadProfileProtocol {
+    
+    func doneLoadProfileProtocol(check:Int,userName:String,profileTextView:String,imageURLString:String)
+    
+}
+
+protocol DoneLoadTrendProtocol {
+    
+    func doneLoadTrendProtocol(check:Int,array:[TrendModel])
+    
+}
+
 
 class SeachAndLoadModel {
     var urlString = String()
     var resultParPage = Int()
     var dataSetsArray:[DataSets] = []
+    var trendModelArray:[TrendModel] = []
+    var doneLoadTrendProtocol:DoneLoadTrendProtocol?
+    
     var doneCatchDataProtocol:DoneCatchDataProtocol?
     var doneLoadDataProtocol:DoneLoadDataProtocol?
     var doneLoadUserNameProtocol:DoneLoadUserNameProtocol?
     var db = Firestore.firestore()
     var userNameArray = [String]()
+    var doneLoadProfileProtocol:DoneLoadProfileProtocol?
     
     
     init(urlString:String) {
@@ -67,9 +83,10 @@ class SeachAndLoadModel {
                     let json:JSON = try JSON(data: response.data!)
                     print(json.debugDescription)
                     
-                    let totalHitCount = json["pageInfo"]["resultsParPage"].int
+                    let totalHitCount = json["pageInfo"]["resultParPage"].int
                     
                     if totalHitCount! < 50{
+                        
                         self.resultParPage = totalHitCount!
                         
                     }else{
@@ -166,6 +183,76 @@ class SeachAndLoadModel {
                 
             }
         }
+    }
+    
+    func loadProfile(userName:String){
+        db.collection("profile").document(userName).addSnapshotListener{
+                (snapShot, error) in
+            if error != nil{
+                print(error.debugDescription)
+                return
+            }
+            
+            let data = snapShot?.data()
+            
+            if let userName = data!["userName"] as? String,let profileTextView = data!["profileTextView"] as? String,let imageURLString = data!["imageURLString"] as? String{
+                
+                self.doneLoadProfileProtocol?
+                    .doneLoadProfileProtocol(check: 1, userName: userName, profileTextView: profileTextView, imageURLString: imageURLString)
+                
+                
+            }
+        
+        }
+        
+    }
+    
+    func getTrend(urlString:String){
+        
+        let encordeUrlString =
+            urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        
+        AF.request(encordeUrlString as! URLConvertible, method: .get, parameters: nil, encoding: JSONEncoding.default).responseJSON { (response) in
+            
+        
+            
+            print(response)
+            
+            switch response.result{
+            
+            
+            case .success:
+                do{
+                    let json:JSON = try JSON(data: response.data!)
+    
+                    for i in 0...50 - 1{
+                        
+                        
+                        if let id =  json["items"][i]["id"].string,let title =  json["items"][i]["snippet"]["title"].string,let description = json["items"][i]["snippet"]["description"].string,let url = json["items"][i]["snippet"]["thumbnails"]["high"]["url"].string,let channelTitle = json["items"][i]["snippet"]["channelTitle"].string,let tags = json["items"][i]["tags"]["publishTime"].array,let viewCount = json["items"][i]["statistics"]["viewCount"].string,let likeCount = json["items"][i]["statistics"]["likeCount"].string,let disLikeCount = json["items"][i]["statistics"]["dislikeCount"].string{
+                            
+                         let trendModel = TrendModel(videoId: id, title: title, url: url, channelTitle: channelTitle, viewCount: viewCount, likeCount: likeCount, disLikeCount: disLikeCount, description: description, tags: tags)
+                        
+                         self.trendModelArray.append(trendModel)
+                            
+                            
+                            }
+                        
+                        
+                    }
+                    self.doneLoadTrendProtocol?.doneLoadTrendProtocol(check: 1, array: self.trendModelArray)
+                    
+                  
+                }catch{
+                    print("エラーです")
+                }
+            
+            
+            
+            case .failure(_): break
+                
+            }
+        }
+        
     }
     
 }

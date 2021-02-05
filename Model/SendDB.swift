@@ -47,6 +47,7 @@ class SendDB {
         self.title = title
         self.publishTime = publishTime
         self.channelTitle = channelTitle
+        self.description = description
         
         
     }
@@ -55,10 +56,9 @@ class SendDB {
     func sendData(userName:String){
         
         self.db.collection("contents").document(userName).collection("collection").document().setData(
-            
             ["userID":self.userID as Any,"userName":self.userName as Any,"videoID":self.videoID as Any,"title":self.title as Any,
              "publishTime":self.publishTime as Any,
-             "channelTitle":self.channelTitle as Any,"postDate":Date().timeIntervalSince1970])
+             "channelTitle":self.channelTitle as Any,"description":self.description,"postDate":Date().timeIntervalSince1970])
         
         self.db.collection("Users").addDocument(data: ["userName":self.userName])
         
